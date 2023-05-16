@@ -12,7 +12,7 @@
   "author": "aisbreaker",
   "license": "MIT",
   "dependencies": {
-    "aisbreaker-api": "^0.0.5",
+    "aisbreaker-api": "^0.0.7",
     "boxen": "^7.0.1",
     "clipboardy": "^3.0.0",
     "inquirer": "^9.1.4",

@@ -7,7 +7,7 @@ import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
 import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
-import { /*API,*/ OpenAIAPI/*, OpenAIAPIOptions*/ } from "aisbreaker-api";
+import { /*API,*/ OpenAIAPI/*, OpenAIAPIOptions*/, /*ResponseEvent,* StreamProgressFunction*/ } from "aisbreaker-api";
 import Keyv from 'keyv';
 
 const arg = process.argv.find(_arg => _arg.startsWith('--settings'));
@@ -147,24 +147,32 @@ async function onMessage(message) {
     spinner.prefixText = '\n   ';
     spinner.start();
     try {
-        const response = await client.sendMessage(
-            message,
-            currentConversationData.conversationState,
-            /*onProgress:*/ (token) => {
-                reply += token;
-                const output = tryBoxen(`${reply.trim()}█`, {
-                    title: aiLabel, padding: 0.7, margin: 1, dimBorder: true,
-                });
-                spinner.text = `${spinnerPrefix}\n${output}`;
-            },
-        );
-        let responseText = response.responseText;
-        currentConversationData.conversationState = response.conversationState;
+        const streamProgress/*: StreamProgressFunction*/ = (responseEvent/*: ResponseEvent*/) => {
+              //console.log("streamProgress: ", JSON.stringify(responseEvent/*, undefined, 2*/)) 
+              const token = responseEvent?.outputs[0]?.text?.content || '';
+              reply += token;
+              const output = tryBoxen(`${reply.trim()}█`, {
+                  title: aiLabel, padding: 0.7, margin: 1, dimBorder: true,
+              });
+              spinner.text = `${spinnerPrefix}\n${output}`;
+        };
+        const responseFinal = await client.sendMessage({
+            inputs: [ {
+                text: {
+                    role: 'user',
+                    content: message,
+                },
+            } ],
+            conversationState: currentConversationData.conversationState,
+            streamProgressFunction: streamProgress,
+        });
+        let responseText = responseFinal?.outputs[0]?.text?.content;
+        currentConversationData.conversationState = responseFinal?.conversationState;
 
         clipboard.write(responseText).then(() => {}).catch(() => {});
         spinner.stop();
         currentConversationData = {
-            conversationState: response.conversationState,
+            conversationState: responseFinal.conversationState,
         };
         await chatCliCache.set('currentConversation', currentConversationData);
         const output = tryBoxen(responseText, {
