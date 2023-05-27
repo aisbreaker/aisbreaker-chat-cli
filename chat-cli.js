@@ -7,7 +7,7 @@ import ora from 'ora';
 import clipboard from 'clipboardy';
 import inquirer from 'inquirer';
 import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt';
-import { /*API,*/ OpenAIAPI/*, OpenAIAPIOptions*/, /*ResponseEvent,* StreamProgressFunction*/ } from "aisbreaker-api";
+import { AIsBreaker, OpenAIChat } from 'aisbreaker-api';
 import Keyv from 'keyv';
 
 const arg = process.argv.find(_arg => _arg.startsWith('--settings'));
@@ -73,14 +73,12 @@ const availableCommands = [
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt);
 
-const clientToUse = settings.cliOptions?.clientToUse || settings.clientToUse || 'chatgpt';
-
-let client = new OpenAIAPI({
-    openaiApiKey: settings.openaiApiKey /*|| settings.chatGptClient.openaiApiKey*/,
-    cacheKeyvOptions: settings.cacheOptions,
-    ...settings,
-    //...settings.chatGptClient,
-});
+let client = AIsBreaker.getInstance().createAIsAPI(
+    new OpenAIChat({
+        //openaiApiKey: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        ...settings,
+    })
+);
 
 console.log(tryBoxen('Chat CLI', {
     padding: 0.7, margin: 1, borderStyle: 'double', dimBorder: true,
@@ -220,10 +218,6 @@ async function newConversation() {
 }
 
 async function deleteAllConversations() {
-    if (clientToUse !== 'chatgpt') {
-        logWarning('Deleting all conversations is only supported for ChatGPT client.');
-        return conversation();
-    }
     await chatCliCache.clear();
     await client.clearAllConversations();
     logSuccess('Deleted all conversations.');
@@ -231,10 +225,6 @@ async function deleteAllConversations() {
 }
 
 async function copyConversation() {
-    if (clientToUse !== 'chatgpt') {
-        logWarning('Copying conversations is only supported for ChatGPT client.');
-        return conversation();
-    }
     if (!currentConversationData.conversationState) {
         logWarning('No conversation to copy.');
         return conversation();

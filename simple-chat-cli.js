@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 
-import { OpenAIAPI } from "aisbreaker-api";
+import { AIsBreaker, OpenAIChat } from 'aisbreaker-api';
 
 async function action() {
     console.log("simple-chat-cli");
     console.log("---------------");
 
     // initialization
-    const api = new OpenAIAPI();
+    const api = AIsBreaker.getInstance().createAIsAPI(
+        new OpenAIChat({
+            //openaiApiKey: "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        })
+    );
 
     // 1 question
     const question1 = process.argv[2];
@@ -18,7 +22,7 @@ async function action() {
     }
 
     // 1st: answer
-    const response1 = await await api.sendMessage({
+    const response1 = await api.sendMessage({
         inputs: [ {
             text: {
                 role: 'user',
