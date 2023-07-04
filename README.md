@@ -1,5 +1,8 @@
 # AIs Breaker Chat CLI
 
+## Important: THIS REPO IS OUTDATED
+**The content of this repo is migrated into the monorepo: [github.com/aisbreaker/aisbreaker-js/ackages/aisbreaker-chat-cli/](https://github.com/aisbreaker/aisbreaker-js/tree/main/packages/aisbreaker-chat-cli)!!!**
+
 ## Introduction
 
 This repo contains two demo applications `simple-chat-cli.js` and `chat-cli.js` to demonstrate the usage of `aisbreaker-api` in a JavaScript NodeJS application.
